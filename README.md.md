@@ -8,6 +8,7 @@ Sistema de gestión para un taller de reparación de dispositivos, compuesto por
 
 ## Arquitectura (10 piezas)
 
+
 | Servicio | Puerto | Base de datos | Descripción |
 |---|---|---|---|
 | bff-gateway | 8080 | - | Punto de entrada único (Spring Cloud Gateway) |
