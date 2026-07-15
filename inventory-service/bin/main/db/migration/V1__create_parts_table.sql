@@ -1,0 +1,9 @@
+-- DDL: Structure for parts table
+CREATE TABLE parts (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    sku VARCHAR(50) NOT NULL UNIQUE,
+    stock INTEGER NOT NULL DEFAULT 0,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,292 @@
+# ==========================================
+# CONFIGURACIÓN DE VARIABLES GLOBALES
+# ==========================================
+@gateway = http://localhost:8080
+@token = TU_TOKEN_AQUI_DESPUES_DEL_LOGIN
+
+# ==========================================
+# 1. SERVICIO DE AUTENTICACIÓN (Rutas Públicas)
+# ==========================================
+
+### Registrar un nuevo usuario
+POST {{gateway}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "sebastian",
+  "email": "seba@fullrepar.cl",
+  "password": "miPasswordSeguro123",
+  "role": "USER"
+}
+
+### Iniciar sesión (Devuelve TokenResponse)
+POST {{gateway}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "sebastian",
+  "password": "miPasswordSeguro123"
+}
+
+
+# ==========================================
+# 2. SERVICIO DE CLIENTES (CRUD - Requiere Token)
+# ==========================================
+
+### CREATE: Crear un nuevo cliente
+POST {{gateway}}/api/v1/customers
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullName": "Juan Perez",
+  "email": "juan.perez@gmail.com",
+  "phone": "+56912345678",
+  "address": "Av. Vicuña Mackenna 4686, Macul"
+}
+
+### READ: Obtener todos los clientes
+GET {{gateway}}/api/v1/customers
+Authorization: Bearer {{token}}
+
+### READ BY ID: Obtener un cliente específico (ID: 1)
+GET {{gateway}}/api/v1/customers/1
+Authorization: Bearer {{token}}
+
+### READ: Verificar si un cliente existe (ID: 1)
+GET {{gateway}}/api/v1/customers/1/exists
+Authorization: Bearer {{token}}
+
+### UPDATE: Actualizar un cliente
+PUT {{gateway}}/api/v1/customers/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullName": "Juan Perez Soto",
+  "email": "juan.perez@gmail.com",
+  "phone": "+56912345678",
+  "address": "Av. Vicuña Mackenna 4686, Macul"
+}
+
+### DELETE: Eliminar un cliente
+DELETE {{gateway}}/api/v1/customers/1
+Authorization: Bearer {{token}}
+
+
+# ==========================================
+# 3. SERVICIO DE DISPOSITIVOS (CRUD - Requiere Token)
+# ==========================================
+
+### CREATE: Registrar un dispositivo (asociado a un cliente)
+POST {{gateway}}/api/v1/devices
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customerId": 1,
+  "brand": "Apple",
+  "model": "iPhone 13",
+  "serialNumber": "SN-IPH13-0001",
+  "deviceType": "SMARTPHONE"
+}
+
+### READ: Listar todos los dispositivos
+GET {{gateway}}/api/v1/devices
+Authorization: Bearer {{token}}
+
+### READ: Listar dispositivos de un cliente (ID: 1)
+GET {{gateway}}/api/v1/devices/customer/1
+Authorization: Bearer {{token}}
+
+### READ BY ID: Obtener un dispositivo específico (ID: 1)
+GET {{gateway}}/api/v1/devices/1
+Authorization: Bearer {{token}}
+
+### READ: Verificar si un dispositivo existe (ID: 1)
+GET {{gateway}}/api/v1/devices/1/exists
+Authorization: Bearer {{token}}
+
+### DELETE: Eliminar un dispositivo
+DELETE {{gateway}}/api/v1/devices/1
+Authorization: Bearer {{token}}
+
+
+# ==========================================
+# 4. SERVICIO DE ÓRDENES DE REPARACIÓN (Requiere Token)
+# ==========================================
+
+### CREATE: Crear una orden de reparación
+POST {{gateway}}/api/v1/repairs
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customerId": 1,
+  "deviceId": 1,
+  "issueDescription": "Pantalla rota, no enciende",
+  "estimatedCost": 89990.00
+}
+
+### READ: Listar todas las órdenes de reparación
+GET {{gateway}}/api/v1/repairs
+Authorization: Bearer {{token}}
+
+### READ: Listar órdenes de reparación de un cliente (ID: 1)
+GET {{gateway}}/api/v1/repairs/customer/1
+Authorization: Bearer {{token}}
+
+### READ BY ID: Obtener una orden específica (ID: 1)
+GET {{gateway}}/api/v1/repairs/1
+Authorization: Bearer {{token}}
+
+### UPDATE: Cambiar el estado de una orden
+# Valores válidos: RECEIVED, IN_PROGRESS, COMPLETED, DELIVERED, CANCELLED
+PATCH {{gateway}}/api/v1/repairs/1/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "IN_PROGRESS"
+}
+
+### READ: Verificar si una orden está completada (ID: 1)
+GET {{gateway}}/api/v1/repairs/1/completed
+Authorization: Bearer {{token}}
+
+
+# ==========================================
+# 5. SERVICIO DE INVENTARIO (CRUD Repuestos - Requiere Token)
+# ==========================================
+
+### CREATE: Crear un repuesto (PartRequest)
+POST {{gateway}}/api/v1/inventory
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Pantalla OLED iPhone 13",
+  "sku": "REP-IPH13-OLED",
+  "stock": 15,
+  "unitPrice": 89990.00
+}
+
+### READ: Listar todo el inventario de repuestos (findAll)
+GET {{gateway}}/api/v1/inventory
+Authorization: Bearer {{token}}
+
+### READ BY ID: Obtener un repuesto específico por su ID (findById)
+GET {{gateway}}/api/v1/inventory/1
+Authorization: Bearer {{token}}
+
+### UPDATE: Actualizar stock o precio de un repuesto (update)
+PUT {{gateway}}/api/v1/inventory/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Pantalla OLED iPhone 13 Pro Max",
+  "sku": "REP-IPH13-OLED",
+  "stock": 12,
+  "unitPrice": 95990.00
+}
+
+### DELETE: Eliminar un repuesto del inventario (delete)
+DELETE {{gateway}}/api/v1/inventory/1
+Authorization: Bearer {{token}}
+
+
+# ==========================================
+# 6. SERVICIO DE TÉCNICOS (Requiere Token)
+# ==========================================
+
+### CREATE: Registrar un técnico
+POST {{gateway}}/api/v1/technicians
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullName": "Carlos Mendoza",
+  "specialty": "Reparación de smartphones"
+}
+
+### READ: Listar todos los técnicos
+GET {{gateway}}/api/v1/technicians
+Authorization: Bearer {{token}}
+
+### READ: Listar solo técnicos activos
+GET {{gateway}}/api/v1/technicians/active
+Authorization: Bearer {{token}}
+
+### READ BY ID: Obtener un técnico específico (ID: 1)
+GET {{gateway}}/api/v1/technicians/1
+Authorization: Bearer {{token}}
+
+### UPDATE: Desactivar un técnico
+PATCH {{gateway}}/api/v1/technicians/1/deactivate
+Authorization: Bearer {{token}}
+
+
+# ==========================================
+# 7. SERVICIO DE PAGOS (Requiere Token)
+# ==========================================
+
+### CREATE: Registrar un pago asociado a una orden de reparación
+POST {{gateway}}/api/v1/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "repairOrderId": 1,
+  "amount": 89990.00,
+  "method": "CREDIT_CARD"
+}
+
+### READ: Listar pagos de una orden de reparación (ID: 1)
+GET {{gateway}}/api/v1/payments/repair-order/1
+Authorization: Bearer {{token}}
+
+### READ BY ID: Obtener un pago específico (ID: 1)
+GET {{gateway}}/api/v1/payments/1
+Authorization: Bearer {{token}}
+
+### UPDATE: Confirmar un pago
+PATCH {{gateway}}/api/v1/payments/1/confirm
+Authorization: Bearer {{token}}
+
+
+# ==========================================
+# 8. SERVICIO DE NOTIFICACIONES (Requiere Token)
+# ==========================================
+
+### CREATE: Disparar una notificación (ej. cambio de estado, pago confirmado)
+POST {{gateway}}/api/v1/notifications
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "repairOrderId": 1,
+  "event": "REPAIR_STATUS_CHANGED",
+  "message": "Tu reparación ahora está en progreso"
+}
+
+
+# ==========================================
+# 9. SERVICIO DE RESEÑAS (Requiere Token)
+# ==========================================
+
+### CREATE: Crear una reseña para una orden de reparación completada
+POST {{gateway}}/api/v1/reviews
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "repairOrderId": 1,
+  "customerId": 1,
+  "rating": 5,
+  "comment": "Excelente atención, quedó como nuevo"
+}
+
+### READ: Obtener la reseña de una orden de reparación (ID: 1)
+GET {{gateway}}/api/v1/reviews/repair-order/1
+Authorization: Bearer {{token}}

@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.fullrepar'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2025.1.2") // Alineado con eureka-server y bff-gateway
+}
+
+dependencies {
+    // Web & JPA Core
+    implementation 'org.springframework.boot:spring-boot-starter-web' // Corregido de webmvc a web estándar
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // Base de Datos & Flyway (PostgreSQL)
+    // "spring-boot-starter-flyway" NO EXISTE como artefacto: Flyway se activa
+    // automáticamente con flyway-core en el classpath, sin starter dedicado.
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+    
+    // Discovery Client (Eureka)
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // Documentación interactiva de la API (Swagger UI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+
+    // Seguridad: hashing de contraseñas (BCrypt) sin traer todo Spring Security
+    implementation 'org.springframework.security:spring-security-crypto'
+
+    // JWT: generación y firma de tokens
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    // Lombok (Boilerplate reduction)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // Testing (Spring Boot centraliza todo aquí)
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Reemplaza todas las dependencias -test erróneas
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Forzamos la clase principal según la estructura del paquete
+springBoot {
+    mainClass = 'com.fullrepar.auth_service.AuthServiceApplication'
+}

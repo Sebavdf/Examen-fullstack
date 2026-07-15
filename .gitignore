@@ -1,0 +1,17 @@
+# Gradle compilaciones
+**/build/
+**/.gradle/
+*.jar
+
+# IDEs y Sistema
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Docker logs y temporales
+*.log

@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: bff-gateway
+  cloud:
+    gateway:
+      # --- ESTA ES LA CONFIGURACIÓN CLAVE PARA WEBMVC Y EUREKA ---
+      discovery:
+        locator:
+          enabled: true # Permite resolver dinámicamente lb:// NOMBRE-SERVICIO
+      # ----------------------------------------------------------
+      mvc:
+        routes:
+          - id: auth-service
+            uri: lb://AUTH-SERVICE
+            predicates:
+              - Path=/api/v1/auth/**
+          - id: customer-service
+            uri: lb://CUSTOMER-SERVICE
+            predicates:
+              - Path=/api/v1/customers/**
+          - id: device-service
+            uri: lb://DEVICE-SERVICE
+            predicates:
+              - Path=/api/v1/devices/**
+          - id: repair-service
+            uri: lb://REPAIR-SERVICE
+            predicates:
+              - Path=/api/v1/repairs/**
+          - id: inventory-service
+            uri: lb://INVENTORY-SERVICE
+            predicates:
+              - Path=/api/v1/inventory/**
+          - id: technician-service
+            uri: lb://TECHNICIAN-SERVICE
+            predicates:
+              - Path=/api/v1/technicians/**
+          - id: payment-service
+            uri: lb://PAYMENT-SERVICE
+            predicates:
+              - Path=/api/v1/payments/**
+          - id: notification-service
+            uri: lb://NOTIFICATION-SERVICE
+            predicates:
+              - Path=/api/v1/notifications/**
+          - id: review-service
+            uri: lb://REVIEW-SERVICE
+            predicates:
+              - Path=/api/v1/reviews/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+# IMPORTANTE: debe ser EXACTAMENTE igual al "jwt.secret" de auth-service,
+# ya que el gateway valida la firma HS256 con la misma llave con la que se firmó.
+jwt:
+  secret: ${JWT_SECRET:fullrepar-super-secret-key-for-hs256-signing-2026-change-me}
+  # Rutas que NO requieren token (registro/login son públicos por definición,
+  # y actuator se deja libre para health checks de Docker/Eureka).
+  public-paths: /api/v1/auth/**,/actuator/**

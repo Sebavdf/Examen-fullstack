@@ -1,0 +1,272 @@
+
+services:
+  # ---------- Infraestructura ----------
+  eureka-server:
+    build: ./eureka-server
+    container_name: fullrepar-eureka
+    ports:
+      - "8761:8761"
+
+  # ---------- Bases de datos (una por microservicio) ----------
+  db-auth:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-auth
+    environment:
+      POSTGRES_DB: fullrepar_auth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5432:5432"]
+    volumes: [db_auth_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-customer:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-customer
+    environment:
+      POSTGRES_DB: fullrepar_customer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5433:5432"]
+    volumes: [db_customer_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-device:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-device
+    environment:
+      POSTGRES_DB: fullrepar_device
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5434:5432"]
+    volumes: [db_device_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-repair:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-repair
+    environment:
+      POSTGRES_DB: fullrepar_repair
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5435:5432"]
+    volumes: [db_repair_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-inventory:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-inventory
+    environment:
+      POSTGRES_DB: fullrepar_inventory
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5436:5432"]
+    volumes: [db_inventory_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-technician:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-technician
+    environment:
+      POSTGRES_DB: fullrepar_technician
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5437:5432"]
+    volumes: [db_technician_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-payment:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-payment
+    environment:
+      POSTGRES_DB: fullrepar_payment
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5438:5432"]
+    volumes: [db_payment_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-review:
+    image: postgres:15-alpine
+    container_name: fullrepar-db-review
+    environment:
+      POSTGRES_DB: fullrepar_review
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports: ["5439:5432"]
+    volumes: [db_review_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------- Microservicios ----------
+  auth-service:
+    build: ./auth-service
+    container_name: fullrepar-auth-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-auth:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-auth:5432/fullrepar_auth
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:-fullrepar-super-secret-key-for-hs256-signing-2026-change-me}
+    ports: ["8081:8081"]
+
+  customer-service:
+    build: ./customer-service
+    container_name: fullrepar-customer-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-customer:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-customer:5432/fullrepar_customer
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8082:8082"]
+
+  device-service:
+    build: ./device-service
+    container_name: fullrepar-device-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-device:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-device:5432/fullrepar_device
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8083:8083"]
+
+  repair-service:
+    build: ./repair-service
+    container_name: fullrepar-repair-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-repair:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-repair:5432/fullrepar_repair
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8084:8084"]
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: fullrepar-inventory-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-inventory:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-inventory:5432/fullrepar_inventory
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8085:8085"]
+
+  technician-service:
+    build: ./technician-service
+    container_name: fullrepar-technician-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-technician:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-technician:5432/fullrepar_technician
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8086:8086"]
+
+  payment-service:
+    build: ./payment-service
+    container_name: fullrepar-payment-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-payment:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-payment:5432/fullrepar_payment
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8087:8087"]
+
+  notification-service:
+    build: ./notification-service
+    container_name: fullrepar-notification-service
+    depends_on: [eureka-server]
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8088:8088"]
+
+  review-service:
+    build: ./review-service
+    container_name: fullrepar-review-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      db-review:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-review:5432/fullrepar_review
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports: ["8089:8089"]
+
+  bff-gateway:
+    build: ./bff-gateway
+    container_name: fullrepar-bff-gateway
+    depends_on:
+      - eureka-server
+      - auth-service
+      - customer-service
+      - device-service
+      - repair-service
+      - inventory-service
+      - technician-service
+      - payment-service
+      - notification-service
+      - review-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:-fullrepar-super-secret-key-for-hs256-signing-2026-change-me}
+    ports: ["8080:8080"]
+
+volumes:
+  db_auth_data:
+  db_customer_data:
+  db_device_data:
+  db_repair_data:
+  db_inventory_data:
+  db_technician_data:
+  db_payment_data:
+  db_review_data:
