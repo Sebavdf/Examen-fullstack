@@ -51,14 +51,7 @@ Cada servicio puede levantarse individualmente con:
 ```
 En ese caso, cada `application.yml` ya apunta a `localhost` para su base de datos y Eureka.
 
-## Pendientes conocidos (a completar por el equipo)
-- [ ] Seguridad JWT real en `auth-service` (actualmente el login no genera un token firmado) y filtro de validación en los microservicios/gateway.
-- [ ] Hash de contraseñas con BCrypt en `auth-service`.
-- [ ] Documentación Swagger/OpenAPI por servicio (agregar `springdoc-openapi`).
-- [ ] Exportar colección Postman desde OpenAPI.
-- [ ] Informe de cobertura (Jacoco) y diagramas C2/C3.
-- [ ] Configurar GlitchTip para visualización de logs.
-- [ ] Ajustar cobertura de tests al mínimo exigido por la pauta oficial (revisar si aplica 80% o 40%).
+
 
 ## Estructura del repositorio
 ```
